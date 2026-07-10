@@ -1,10 +1,25 @@
 # 高考志愿辅助填报系统
 
-基于 **Next.js + Hono + Cloudflare Workers + D1** 的高考志愿辅助填报平台。
+<p align="center">
+  <img src="https://img.shields.io/badge/status-online-brightgreen?style=flat-square" alt="status" />
+  <img src="https://img.shields.io/gitee/stars/peng-chao2005/gaokao-helper?style=flat-square&logo=gitee" alt="stars" />
+  <img src="https://img.shields.io/gitee/forks/peng-chao2005/gaokao-helper?style=flat-square&logo=gitee" alt="forks" />
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Hono-4.11-hotpink?style=flat-square&logo=hono" alt="Hono" />
+  <img src="https://img.shields.io/badge/Cloudflare%20Workers-4.110-orange?style=flat-square&logo=cloudflare" alt="Workers" />
+  <img src="https://img.shields.io/badge/D1-SQLite-3b82f6?style=flat-square&logo=cloudflare" alt="D1" />
+  <img src="https://img.shields.io/badge/deployed-2026--07--10-8A2BE2?style=flat-square" alt="deployed" />
+</p>
 
-> 🚀 **在线体验**：https://volunteer.lxpavilion.top
->
-> 测试账号：`zhangsan` / `123456` | 管理员：`admin` / `123456`
+<p align="center">
+  <strong>基于 Next.js + Hono + Cloudflare Workers + D1 的高考志愿辅助填报平台</strong>
+  <br />
+  🚀 <a href="https://volunteer.lxpavilion.top"><strong>在线体验 →</strong></a>
+  <br />
+  测试账号：<code>zhangsan</code> / <code>123456</code> &nbsp;|&nbsp; 管理员：<code>admin</code> / <code>123456</code>
+</p>
 
 ## 功能概览
 
