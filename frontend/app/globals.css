@@ -1,0 +1,334 @@
+/**
+ * 全局样式文件
+ *
+ * 本文件通过 Tailwind CSS v4 的 @import 指令引入框架，
+ * 并定义了项目的主题色、玻璃拟态（Glassmorphism）组件样式、
+ * 背景动画以及自定义滚动条样式。
+ */
+
+/* ─── Tailwind CSS 入口 ─── */
+/**
+ * @import "tailwindcss" — Tailwind CSS v4 的入口指令。
+ * v4 版本采用原生 CSS 层叠（@layer）机制，
+ * 无需再通过 @tailwind base/components/utilities 逐层引入。
+ * 该指令会自动生成 Tailwind 的原子化工具类。
+ */
+@import "tailwindcss";
+
+/* ─── 深色模式变体 ─── */
+/**
+ * @custom-variant — Tailwind CSS v4 的自定义变体指令。
+ * 定义 dark: 前缀的行为：当元素或其父级拥有 .dark 类时激活。
+ * 使用方式：class="bg-white dark:bg-slate-900"
+ * &:where(.dark, .dark *) 确保 .dark 类可以放在任意祖先元素上。
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── 主题自定义 ─── */
+/**
+ * @theme 块 — 定义项目的设计令牌（Design Tokens）。
+ * 这些自定义值可以像 Tailwind 内置值一样使用：
+ * class="bg-accent text-accent-dark"
+ *
+ * --color-accent: 主色调（靛蓝）
+ * --color-accent-dark: 深色主色调（用于 hover 等交互状态）
+ * --color-accent-light: 浅色主色调（用于背景高亮）
+ */
+@theme {
+  --color-accent: #6366f1;
+  --color-accent-dark: #4f46e5;
+  --color-accent-light: #eef2ff;
+}
+
+/* ─── 基础 ─── */
+
+/**
+ * 全局盒模型重置
+ * border-box 使得 width/height 包含 padding 和 border，
+ * 更符合直觉的尺寸计算方式。
+ */
+* { box-sizing: border-box; }
+
+/**
+ * 全局字体设置
+ * 优先使用系统原生字体（-apple-system, BlinkMacSystemFont），
+ * 然后是中文字体（PingFang SC, Microsoft YaHei），
+ * 最后 fallback 到 sans-serif。
+ * -webkit-font-smoothing: antialiased 让字体渲染更细腻。
+ * user-select: none 禁止文本选中，使界面更像原生应用。
+ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/**
+ * 链接重置
+ * 去除下划线，颜色继承父元素，避免浏览器默认样式干扰。
+ */
+a { text-decoration: none; color: inherit; }
+
+/* ─── 玻璃拟态 ─── */
+
+/**
+ * .glass — 基础玻璃面板
+ * 半透明背景 + backdrop-filter 模糊实现毛玻璃效果。
+ * 深色模式下背景色更深、边框更透明。
+ */
+.glass {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);  /* Safari 兼容 */
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.dark .glass {
+  background: rgba(30,41,59,0.5);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/**
+ * .glass-card — 玻璃卡片
+ * 使用 @apply 组合多个 Tailwind 类实现圆角、背景、模糊、边框、阴影。
+ * hover 时背景变实、阴影加深，并微微放大（scale: 1.01）。
+ * transition 使用 cubic-bezier(0.22,1,0.36,1) 弹性缓动曲线。
+ */
+.glass-card {
+  @apply rounded-2xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-lg;
+  transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+.glass-card:hover {
+  @apply bg-white/50 dark:bg-slate-700/50 shadow-xl;
+  transform: scale(1.01);
+}
+
+/**
+ * .glass-btn — 玻璃按钮
+ * 圆角较小、默认阴影更轻。hover 时背景变实、阴影加深。
+ */
+.glass-btn {
+  @apply rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-sm;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  font-family: inherit;
+}
+.glass-btn:hover {
+  @apply bg-white/60 dark:bg-slate-700/60 shadow-md;
+}
+
+/**
+ * .glass-input — 玻璃输入框
+ * 默认状态带半透明背景和边框。
+ * :focus 时边框变为靛蓝色，并添加外发光（box-shadow）。
+ * ::placeholder 使用更浅的颜色。
+ */
+.glass-input {
+  @apply w-full rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/40 dark:border-white/10 px-4 py-2.5 text-sm outline-none;
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+.glass-input:focus {
+  @apply border-indigo-400/60 dark:border-indigo-400/40;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.glass-input::placeholder { @apply text-slate-400 dark:text-slate-500; }
+
+/* ─── 背景动画 ─── */
+
+/**
+ * .bg-gradient-animate — 渐变动画背景
+ * 使用四色对角渐变，背景尺寸设置为 400% x 400%，
+ * 通过 animation 驱动 background-position 移动，
+ * 产生平滑的色彩流动效果，动画周期 15 秒。
+ */
+.bg-gradient-animate {
+  background: linear-gradient(-45deg, #a18cd1, #fbc2eb, #a1c4fd, #c2e9fb);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+}
+
+/**
+ * @keyframes gradientMove — 渐变动画的关键帧
+ * 从 0% 50% 移动到 100% 50% 再返回起点，
+ * 形成左右来回的流动效果。
+ */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── 滚动条 ─── */
+
+/**
+ * Webkit 内核浏览器（Chrome, Edge, Safari）滚动条样式
+ * 宽度 5px，滑块使用半透明靛蓝色，轨道透明。
+ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/**
+ * Firefox 滚动条样式（标准属性）
+ * thin — 细滚动条模式
+ * scrollbar-color 顺序：滑块颜色 轨道颜色
+ */
+* { scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.3) transparent; }
+
+/* ─── 全局交互优化 ─── */
+
+/**
+ * 平滑滚动：适用于整个页面
+ */
+html { scroll-behavior: smooth; }
+
+/**
+ * 深色模式过渡动画
+ * 为 background-color 和 color 属性添加过渡效果，
+ * 让深浅模式切换时颜色变化更平滑。
+ */
+html, body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/**
+ * 文本选中样式
+ * 靛蓝色背景+白色文字，与主题色统一
+ */
+::selection {
+  background: rgba(99, 102, 241, 0.2);
+  color: inherit;
+}
+
+/**
+ * 全局 focus-visible 样式
+ * 键盘导航时显示清晰的焦点环，提升无障碍体验
+ */
+*:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 2px;
+}
+
+/* ─── 加载骨架屏动画 ─── */
+
+/**
+ * 骨架屏脉冲动画
+ * 用于数据加载时的占位效果。
+ * 用法：<div className="skeleton h-4 w-full rounded" />
+ */
+.skeleton {
+  background: linear-gradient(90deg, rgba(99,102,241,0.06) 25%, rgba(99,102,241,0.15) 50%, rgba(99,102,241,0.06) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── 响应式优化 ─── */
+
+/**
+ * 小屏幕下减少内边距，优化显示空间
+ */
+@media (max-width: 640px) {
+  .glass-card-padding {
+    padding: 1rem !important;
+  }
+}
+
+/**
+ * 移动端表格滚动支持
+ */
+@media (max-width: 768px) {
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── 卡片交互增强 ─── */
+
+/**
+ * 卡片悬停动效
+ * 用于列表卡片在鼠标悬停时轻微上浮
+ */
+.glass-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+}
+
+/**
+ * 页面进入动画
+ * 内容区域淡入上浮效果
+ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* ─── 统计卡片 ─── */
+
+/**
+ * 统计数字卡片
+ * 用于展示录取人数、院校数量等关键指标
+ */
+.stat-card {
+  @apply rounded-2xl bg-white/30 dark:bg-slate-800/30 backdrop-blur-md border border-white/30 dark:border-white/5 p-5 text-center;
+}
+.stat-card .stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/**
+ * 标签渐变色
+ * 用于冲稳保分类标签
+ */
+.badge-gradient-success {
+  background: linear-gradient(135deg, #34d399, #10b981);
+}
+.badge-gradient-primary {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+}
+.badge-gradient-accent {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+/* ─── 移动端适配 ─── */
+
+/**
+ * 移动端导航切换按钮
+ */
+.mobile-nav-toggle {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/**
+ * 内容区过渡动画
+ */
+.content-fade {
+  animation: contentFadeIn 0.35s ease-out;
+}
+@keyframes contentFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

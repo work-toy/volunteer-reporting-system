@@ -1,0 +1,31 @@
+# 统一使用 LF 换行符
+* text=auto eol=lf
+
+# Python 文件
+*.py text eol=lf
+
+# JavaScript / TypeScript
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+
+# 样式文件
+*.css text eol=lf
+*.html text eol=lf
+
+# 配置文件
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+
+# SQL 脚本
+*.sql text eol=lf
+
+# 二进制文件不要自动转换
+*.png binary
+*.jpg binary
+*.ico binary
+*.gz binary
