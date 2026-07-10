@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "volunteer-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  "routes": [
+    { "pattern": "volunteer.lxpavilion.top", "custom_domain": true }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "test",
+      "database_id": "68028046-5150-4cb4-88ee-ce0073a232c6"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
