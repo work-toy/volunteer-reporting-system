@@ -1,6 +1,10 @@
 # 高考志愿辅助填报系统
 
-基于 Next.js + FastAPI + MySQL 的高考志愿辅助填报平台。
+基于 **Next.js + Hono + Cloudflare Workers + D1** 的高考志愿辅助填报平台。
+
+> 🚀 **在线体验**：https://volunteer.lxpavilion.top
+>
+> 测试账号：`zhangsan` / `123456` | 管理员：`admin` / `123456`
 
 ## 功能概览
 
@@ -20,7 +24,10 @@
 | `/home` | 首页概览 | 登录用户 |
 | `/university` | 高校列表（支持按省份/关键词筛选） | 登录用户 |
 | `/university/[id]` | 高校详情（含专业列表、历年录取数据） | 登录用户 |
+| `/score` | 成绩录入 | 登录用户 |
 | `/recommend` | 估分选大学 | 登录用户 |
+| `/application` | 志愿填报 | 登录用户 |
+| `/risk` | 风险预警 | 登录用户 |
 | `/skill` | 填报技巧 | 登录用户 |
 | `/message` | 留言板 | 登录用户 |
 | `/admin` | 管理后台首页 | 管理员 |
@@ -55,144 +62,125 @@
 | `DELETE /api/skill/{id}` | 删除技巧（管理员） |
 | `GET /api/message/list` | 留言列表 |
 | `POST /api/message/create` | 发布留言 |
-| `DELETE /api/message/{id}` | 删除留言（管理员） |
+| `DELETE /api/message/{id}` | 删除留言（本人或管理员） |
+| `GET /api/score/history` | 成绩列表 |
+| `GET /api/score/latest` | 最新成绩 |
+| `POST /api/score/entry` | 录入成绩 |
+| `GET /api/application/list` | 志愿列表（需登录） |
+| `POST /api/application/add` | 添加志愿 |
+| `POST /api/application/submit` | 提交志愿 |
+| `POST /api/application/withdraw` | 撤回志愿 |
+| `POST /api/application/reorder` | 重排志愿顺序 |
+| `GET /api/application/check-risk` | 风险预警 |
 
 ## 技术栈
 
 | 层 | 技术 |
 |----|------|
 | **前端** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4, Zustand |
-| **后端** | Python 3.11+, FastAPI, SQLAlchemy (asyncio), aiomysql |
-| **数据库** | MySQL 8.0 |
-| **认证** | JWT (python-jose) |
+| **后端** | TypeScript, Hono, Cloudflare Workers, D1 (SQLite) |
+| **数据库** | Cloudflare D1 (SQLite) |
+| **认证** | JWT (HS256) |
+| **部署** | Cloudflare Workers (Static Assets + API) |
 
-## 环境要求
+## 项目结构
 
-- **Node.js** >= 18
-- **npm** >= 8 (或 pnpm)
-- **Python** >= 3.11
-- **MySQL** >= 8.0
-
-## 快速启动
-
-### 1. 克隆项目
-
-```bash
-git clone https://gitee.com/peng-chao2005/gaokao-helper.git
-cd gaokao-helper
+```
+gaokao-helper/
+├── backend/                       # Python 后端（原始版，MySQL）
+│   └── app/
+│       ├── main.py                # FastAPI 应用入口
+│       ├── config.py
+│       ├── database.py
+│       ├── routers/               # 7 个路由模块
+│       ├── models/
+│       └── schemas/
+│
+├── frontend/                      # Next.js 前端（原始版）
+│
+├── frontend-worker/               # Cloudflare Workers 部署版前端（复制自 frontend）
+│   ├── app/                       # 页面组件
+│   ├── components/                # UI 组件
+│   ├── lib/api.ts                 # API 封装
+│   └── next.config.ts             # output: "export"
+│
+├── worker/                        # Cloudflare Worker API
+│   ├── src/
+│   │   ├── index.ts               # Hono 应用入口
+│   │   ├── middleware.ts           # JWT 认证中间件
+│   │   ├── config.ts              # 配置
+│   │   ├── types.ts               # 类型定义
+│   │   └── routers/               # 7 个路由模块（D1 版）
+│   ├── wrangler.jsonc             # Worker 配置（含 D1 + Assets）
+│   ├── schema_d1.sql              # D1 建表 SQL
+│   └── seed_d1.sql                # 种子数据
+│
+└── README.md
 ```
 
-### 2. 数据库初始化
+## 部署到 Cloudflare Workers
 
-确保 MySQL 服务已启动，然后执行：
+### 前置要求
+
+- Node.js >= 18
+- npm
+- [Cloudflare 账号](https://dash.cloudflare.com)
+
+### 1. 初始化 D1 数据库
 
 ```bash
-mysql -h localhost -P 3307 -u root -p < backend/sql/init.sql
-mysql -h localhost -P 3307 -u root -p < backend/sql/seed.sql
-mysql -h localhost -P 3307 -u root -p < backend/sql/sp.sql
+cd worker
+
+# 创建数据库
+npx wrangler d1 create gaokao-db
+
+# 建表
+npx wrangler d1 execute gaokao-db --remote --file=schema_d1.sql
+
+# 导入种子数据
+npx wrangler d1 execute gaokao-db --remote --file=seed_d1.sql
 ```
 
-> **数据库配置**：连接信息在 `backend/app/config.py` 中，默认 `localhost:3307`、用户 `root`、密码 `root123`、数据库 `gaokao`。
-> 如果你的 MySQL 端口、账号或密码与上述不同，需要**同步修改两个地方**：一是 mysql 命令中的连接参数（`-P`、`-u`、`-p`），二是 `backend/app/config.py` 中的 `DATABASE_CONFIG`（见下方示例），保证两边的端口/账号/密码一致。
->
-> ```python
-> # backend/app/config.py
-> DATABASE_CONFIG = {
->     "host": "localhost",
->     "port": 3307,    # 按实际 MySQL 端口修改
->     "user": "root",
->     "password": "root123",
->     "database": "gaokao",
-> }
-> ```
->
-> **默认管理员**：`admin` / `123456`
->
-> **演示用户**（密码均为 `123456`）：
-> - `zhangsan`（620分，6个志愿，数据最全）
-> - `gaokao2026`（585分，6个志愿）
-> - `wangfang`（645分，5个志愿）
-> - `tang` / `lihua` / `zhaoyi`（可手动体验）
+### 2. 构建前端
 
-### 3. 启动后端
+```bash
+cd frontend-worker
+npm install
+npm run build   # 生成静态文件到 out/
+cp -r out ../worker/dist
+```
 
-#### 方式 A：使用 uv（推荐）
+### 3. 部署 Worker
+
+```bash
+cd worker
+npm install
+npx wrangler deploy
+```
+
+> 一个域名全搞定：`https://volunteer.lxpavilion.top`
+> - `/` → 前端静态页面
+> - `/api/*` → Worker API
+
+## 本地开发
+
+### 后端（Python 版，仅供本地调试）
 
 ```bash
 cd backend
-uv sync
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### 方式 B：使用标准 Python
-
-```bash
-cd backend
-
-# 创建虚拟环境（推荐）
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-# source .venv/bin/activate
-
-# 安装依赖
 pip install -r requirements.txt
-
-# 启动服务
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-
-> 如果 8000 端口被占用，可将 `--port 8000` 改为其他端口（如 `--port 9000`），同时需要同步修改前端 `frontend/next.config.ts` 中 `rewrites` 代理的目标端口。
-
-### 4. 启动前端（开发模式）
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-前端启动后访问：http://localhost:5173
-
-> 前端通过 Next.js 的 `rewrites` 代理将 `/api/*` 请求转发到后端 `http://localhost:8000/api/*`（配置见 `frontend/next.config.ts`）。
-> 如果后端端口改了，需同步修改 `frontend/next.config.ts` 中的 `destination` 地址。
-> 如需修改前端开发服务器端口，可在命令后加 `--port` 参数：`npm run dev -- --port 3000`。
-
-## 生产模式启动
-
-### 后端
-
-按快速启动第 3 步「方式 B（标准 Python）」安装依赖并激活虚拟环境，
-启动时去掉 `--reload` 标志：
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
-```
-
-> 生产模式去掉 `--reload` 标志，避免热重载带来的额外开销。
-> 也支持使用 `uv` 启动（需先 `uv sync`）：`uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1`
-
-后端启动后访问：
-- API 服务：http://localhost:8000
-- API 文档（Swagger）：http://localhost:8000/docs
 
 ### 前端
 
 ```bash
 cd frontend
 npm install
-npm run build   # 预编译为静态文件（JS/CSS 压缩、Tree Shaking、代码优化）
-npm start       # 启动生产服务器，端口 3000
+npm run dev      # 访问 http://localhost:5173
 ```
 
-> 如需修改生产服务器端口，可使用 `-p` 参数：`npm start -- -p 3001`，或设置环境变量 `PORT=3001`。
-
-> **生产模式更快** 
-
-前端启动后访问：http://localhost:3000
-
-> 前端通过 Next.js 的 `rewrites` 代理将 `/api/*` 请求转发到后端 `http://localhost:8000/api/*`（配置见 `frontend/next.config.ts`）。
+> 前端通过 Next.js `rewrites` 将 `/api/*` 代理到 `http://localhost:8000/api/*`
 
 ## 数据概览
 
@@ -206,68 +194,17 @@ npm start       # 启动生产服务器，端口 3000
 | **填报技巧** | 10 篇 | 冲稳保策略、选校建议等 |
 | **预置用户** | 6 个 | 各有不同分数段，含成绩和志愿数据 |
 
-## 项目结构
+**演示账号**（密码均为 `123456`）：
 
-```
-gaokao-helper/
-├── backend/                    # Python 后端
-│   ├── app/
-│   │   ├── main.py             # FastAPI 应用入口
-│   │   ├── config.py           # 数据库 & JWT 配置
-│   │   ├── database.py         # 数据库连接（SQLAlchemy AsyncSession）
-│   │   ├── models/
-│   │   │   └── models.py       # SQLAlchemy ORM 模型
-│   │   ├── routers/
-│   │   │   ├── auth.py         # 认证接口（登录/注册）
-│   │   │   ├── university.py   # 高校信息接口
-│   │   │   ├── major.py        # 专业信息接口
-│   │   │   ├── skill.py        # 填报技巧接口
-│   │   │   ├── message.py      # 留言板接口
-│   │   │   ├── score.py        # 成绩录入接口
-│   │   │   └── application.py  # 志愿填报+风险预警接口
-│   │   └── schemas/
-│   │       └── schemas.py      # Pydantic 数据模型
-│   ├── sql/
-│   │   ├── init.sql            # 建表 & 基础数据
-│   │   ├── seed.sql            # 测试数据
-│   │   └── sp.sql              # 存储过程
-│   ├── pyproject.toml          # uv 项目配置
-│   └── requirements.txt        # pip 依赖
-│
-├── frontend/                   # Next.js 前端
-│   ├── app/
-│   │   ├── page.tsx            # 根页面（重定向至 /select）
-│   │   ├── layout.tsx          # 根布局
-│   │   ├── globals.css         # 全局样式
-│   │   ├── (auth)/             # 认证相关页面
-│   │   │   ├── select/
-│   │   │   ├── user-login/
-│   │   │   ├── user-register/
-│   │   │   └── admin-login/
-│   │   ├── (main)/             # 用户主功能页面
-│   │   │   ├── home/
-│   │   │   ├── score/          # 成绩录入
-│   │   │   ├── university/
-│   │   │   ├── recommend/
-│   │   │   ├── application/    # 志愿填报
-│   │   │   ├── risk/           # 风险预警
-│   │   │   ├── skill/
-│   │   │   └── message/
-│   │   └── admin/              # 管理后台页面
-│   │       ├── universities/
-│   │       ├── majors/
-│   │       ├── skills/
-│   │       └── messages/
-│   ├── components/             # UI 组件
-│   │   ├── ui/                 # 通用组件（Button、Input、Select、Dialog 等）
-│   │   └── layout/             # 布局组件（Header、Sidebar）
-│   ├── lib/
-│   │   └── api.ts              # API 请求封装
-│   ├── stores/
-│   │   └── authStore.ts        # Zustand 状态管理
-│   ├── next.config.ts          # Next.js 配置（含 API 代理）
-│   └── package.json
-│
-└── README.md
-```
+| 账号 | 分数 | 说明 |
+|------|:----:|------|
+| `zhangsan` | 620 | 数据最全，6 个志愿 |
+| `gaokao2026` | 585 | 6 个志愿 |
+| `wangfang` | 645 | 5 个志愿（冲刺方案） |
+| `tang` | 530 | 可手动体验 |
+| `lihua` | 480 | 可手动体验 |
+| `zhaoyi` | 560 | 可手动体验 |
 
+## License
+
+MIT
