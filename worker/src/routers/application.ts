@@ -70,7 +70,34 @@ app.post('/api/application/submit', requireAuth, async (c) => {
   return c.json({ message: `已提交 ${results.length} 个志愿` })
 })
 
-// 风险预警
+// 前端: POST /api/application/withdraw — 撤回所有已提交的志愿
+app.post('/api/application/withdraw', requireAuth, async (c) => {
+  const { results } = await c.env.DB.prepare(
+    `SELECT a.id FROM application a
+     WHERE a.user_id = ? AND a.status = 'submitted'`
+  ).bind(c.var.auth.username).all()
+  if (results.length === 0) return c.json({ detail: '没有已提交的志愿可撤回' }, 400)
+  await c.env.DB.prepare(
+    "UPDATE application SET status = 'draft' WHERE user_id = ? AND status = 'submitted'"
+  ).bind(c.var.auth.username).run()
+  return c.json({ message: `已撤回 ${results.length} 个志愿` })
+})
+
+// 前端: GET /api/application/check-risk
+app.get('/api/application/check-risk', requireAuth, async (c) => {
+  const { results } = await c.env.DB.prepare(
+    `SELECT a.id, a.university_id, a.major_id, a.priority,
+            u.name AS university_name, u.min_score,
+            COALESCE((SELECT MAX(score) FROM score WHERE user_id = ?), 0) AS user_score
+     FROM application a
+     LEFT JOIN university u ON a.university_id = u.id
+     WHERE a.user_id = ? AND a.status = 'draft' ORDER BY a.priority`
+  ).bind(c.var.auth.username, c.var.auth.username).all()
+
+  return c.json(calcRisk(results as any[], c.var.auth.username))
+})
+
+// 内部: GET /api/application/risk-warning
 app.get('/api/application/risk-warning', requireAuth, async (c) => {
   const { results } = await c.env.DB.prepare(
     `SELECT a.id, a.university_id, a.major_id, a.priority,
@@ -81,8 +108,13 @@ app.get('/api/application/risk-warning', requireAuth, async (c) => {
      WHERE a.user_id = ? AND a.status = 'draft' ORDER BY a.priority`
   ).bind(c.var.auth.username, c.var.auth.username).all()
 
-  const rows = results as any[]
-  if (rows.length === 0) return c.json({ total: 0, reach: 0, stable: 0, safe: 0, has_duplicate: false, has_reverse: false, warnings: [], suggestion: '暂无志愿数据' })
+  return c.json(calcRisk(results as any[], c.var.auth.username))
+})
+
+function calcRisk(rows: any[], username: string) {
+  if (rows.length === 0) {
+    return { total: 0, reach: 0, stable: 0, safe: 0, has_duplicate: false, has_reverse: false, warnings: [], suggestion: '暂无志愿数据' }
+  }
 
   const userScore = rows[0].user_score
   let hasDuplicate = false, hasReverse = false
@@ -97,10 +129,7 @@ app.get('/api/application/risk-warning', requireAuth, async (c) => {
   }
 
   const reach = rows.filter((r: any) => userScore < (r.min_score || 0)).length
-  const stable = rows.filter((r: any) => {
-    const diff = userScore - (r.min_score || 0)
-    return diff >= 0 && diff < 30
-  }).length
+  const stable = rows.filter((r: any) => { const d = userScore - (r.min_score || 0); return d >= 0 && d < 30 }).length
   const safe = rows.filter((r: any) => userScore - (r.min_score || 0) >= 30).length
 
   const warnings: string[] = []
@@ -112,7 +141,7 @@ app.get('/api/application/risk-warning', requireAuth, async (c) => {
   else if (safe === 0) suggestion = '建议增加保底院校'
   else suggestion = '志愿梯度合理'
 
-  return c.json({ total: rows.length, reach, stable, safe, has_duplicate: hasDuplicate, has_reverse: hasReverse, warnings, suggestion })
-})
+  return { total: rows.length, reach, stable, safe, has_duplicate: hasDuplicate, has_reverse: hasReverse, warnings, suggestion }
+}
 
 export { app as applicationRouter }

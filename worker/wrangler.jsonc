@@ -13,6 +13,11 @@
       "database_id": "68028046-5150-4cb4-88ee-ce0073a232c6"
     }
   ],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
   "observability": {
     "enabled": true
   }
