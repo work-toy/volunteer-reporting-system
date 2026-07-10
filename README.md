@@ -2,13 +2,16 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-online-brightgreen?style=flat-square" alt="status" />
-  <img src="https://img.shields.io/gitee/stars/peng-chao2005/gaokao-helper?style=flat-square&logo=gitee" alt="stars" />
-  <img src="https://img.shields.io/gitee/forks/peng-chao2005/gaokao-helper?style=flat-square&logo=gitee" alt="forks" />
+  <img src="https://gitee.com/peng-chao2005/gaokao-helper/badge/star.svg?theme=light" alt="stars" />
+  <img src="https://gitee.com/peng-chao2005/gaokao-helper/badge/fork.svg?theme=light" alt="forks" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python" alt="Python" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi" alt="FastAPI" />
   <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Hono-4.11-hotpink?style=flat-square&logo=hono" alt="Hono" />
-  <img src="https://img.shields.io/badge/Cloudflare%20Workers-4.110-orange?style=flat-square&logo=cloudflare" alt="Workers" />
+  <img src="https://img.shields.io/badge/Cloudflare-orange?style=flat-square&logo=cloudflare" alt="Cloudflare" />
+  <img src="https://img.shields.io/badge/Workers-4.110-orange?style=flat-square&logo=cloudflare" alt="Workers" />
   <img src="https://img.shields.io/badge/D1-SQLite-3b82f6?style=flat-square&logo=cloudflare" alt="D1" />
   <img src="https://img.shields.io/badge/deployed-2026--07--10-8A2BE2?style=flat-square" alt="deployed" />
 </p>
