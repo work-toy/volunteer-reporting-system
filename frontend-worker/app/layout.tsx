@@ -18,6 +18,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "高考志愿辅助填报系统",
   description: "《数据库系统》课程设计",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 /**
