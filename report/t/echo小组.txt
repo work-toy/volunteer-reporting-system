@@ -1,0 +1,15 @@
+组长：彭超
+组员：鲁瑜，方禹程，王宇涵，张雨彤
+
+
+总任务链接：
+https://pcnh8u2jrg6e.feishu.cn/wiki/SCq0w2Za7io1XFkjau6cDwwenre?table=tblHid27cujjD6Wd&view=vewuOEfowt
+
+bug台账链接：
+https://dcniurffnik6.feishu.cn/wiki/AWUGwy1xVigh08ka9QkcrZFnnic?from=auth_notice&hash=3d2acddf74cb70eb01cff4da0e788a1a&disposable_login_token=eyJ1c2VyX2lkIjoiNzUwMDU0MDM1NDMxMjE1OTIzNCIsImRldmljZV9sb2dpbl9pZCI6Ijc2NjA0NTUzNzMwMjY5MDUzMTAiLCJ0aW1lc3RhbXAiOjE3ODM2ODc1MTYsInVuaXQiOiJldV9uYyIsInB3ZF9sZXNzX2xvZ2luX2F1dGgiOiIxIiwidmVyc2lvbiI6InYzIiwidGVuYW50X2JyYW5kIjoiZmVpc2h1IiwicGtnX2JyYW5kIjoi6aOe5LmmIiwiY2xpZW50X3NjaGVtYSI6IngtZmVpc2h1In0%3D.b0afe260d1281ae0e109ab72f9ad6a87f0d3075e3910867f7f5ea59efd77e547
+
+gitee仓库链接：
+https://gitee.com/peng-chao2005/gaokao-helper
+
+gitee仓库邀请成为观察者链接：
+https://gitee.com/peng-chao2005/gaokao-helper/invite_link?invite=a1ac58eda8fece554c0a69bcd2708069426c8f8c7485ab66e511b1509403e86e0426348ffad448773dd46cb7c099accd2deb438a7165bb6e
